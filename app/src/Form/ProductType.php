@@ -18,9 +18,9 @@ class ProductType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $product = $options['data'];
-        $year = $product->getExpireDate()->format('Y') ? $product->getExpireDate()->format('Y') : date('Y');
-        $month = $product->getExpireDate()->format('m') ? $product->getExpireDate()->format('m') : date('m');
-        $day = $product->getExpireDate()->format('d') ? $product->getExpireDate()->format('d'): date('d');
+        $year = ($product->getExpireDate() !== null && $product->getExpireDate()->format('Y') !== null) ? $product->getExpireDate()->format('Y') : date('Y');
+        $month = ($product->getExpireDate() !== null && $product->getExpireDate()->format('m') !== null) ? $product->getExpireDate()->format('m') : date('m');
+        $day = ($product->getExpireDate() !== null && $product->getExpireDate()->format('d') !== null) ? $product->getExpireDate()->format('d'): date('d');
         $builder
             ->add('expireDate', DateType::class, [
                 'years' => range($year, $year+100),

@@ -31,12 +31,12 @@ class ProductController extends AbstractController
     #[Route('/create', name: 'create')]
     public function create(Request $request) : Response
     {
-        $product = new Product();
-        $form = $this->createForm(ProductType::class, $product);
+        $data = new Product();
+        $form = $this->createForm(ProductType::class, $data);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->productRepository->add($product, true);
+            $this->productRepository->add($data, true);
             $this->addFlash('notice', 'Product added to database');
             return $this->redirectToRoute('app_main');
         }
