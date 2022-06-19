@@ -22,27 +22,25 @@
             </tr>
             </thead>
             <tbody>
-            {%  for data in productList %}
-            <tr>
-                <th scope="row">{{ data.id }}</th>
-                <td>
-                    <a href="{{ path('get', {'id': data.id })  }}"> {{ data.name }}</a>
-                </td>
-                <td>{{ data.description }}</td>
-                <td>{{ data.price }}</td>
-                <td>{{ data.expire_date|date("m/d/Y") }}</td>
-                <td>{{ data.category_name }}</td>
-                <td>
-                    <a class="btn btn-warning" href="{{ path('update', {'id': data.id })  }}">Update</a>
-                </td>
-                <td>
-                    <a class="btn btn-danger" href="{{ path('delete', {'id': data.id })  }}">Delete</a>
-                </td>
-            </tr>
+            {% for product in data %}
+                <tr>
+                    <th scope="row">{{ product.id }}</th>
+                    <td>
+                        <a href="{{ path('get', {'id': product.id }) }}"> {{ product.name }}</a>
+                    </td>
+                    <td>{{ product.description }}</td>
+                    <td>{{ product.price }}</td>
+                    <td>{{ product.expireDate|date("m/d/Y") }}</td>
+                    <td>{{ product.category }}</td>
+                    <td>
+                        <a class="btn btn-warning" href="{{ path('update', {'id': product.id }) }}">Update</a>
+                    </td>
+                    <td>
+                        <a class="btn btn-danger" href="{{ path('delete', {'id': product.id }) }}">Delete</a>
+                    </td>
+                </tr>
             {% endfor %}
             </tbody>
         </table>
-
     </div>
-
 {% endblock %}

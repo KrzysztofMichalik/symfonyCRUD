@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
@@ -19,6 +20,10 @@ class Product
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank]
+    #[Assert\Regex(
+        pattern: '/[a-zA-Z0-9]+/',
+        message: 'The name should contain only alphanumeric characters'
+    )]
     private $name;
 
     #[ORM\Column(type: 'text')]
@@ -33,6 +38,7 @@ class Product
     #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank]
+    #[Assert\Type(Category::class)]
     private $category;
 
     /**
@@ -54,7 +60,7 @@ class Product
         return $this->expireDate;
     }
 
-    public function setExpireDate(\DateTime $expireDate): self
+    public function setExpireDate(?\DateTime $expireDate): self
     {
         $this->expireDate = $expireDate;
 

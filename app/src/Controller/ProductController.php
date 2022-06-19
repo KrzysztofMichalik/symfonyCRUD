@@ -1,91 +1,89 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\Product;
 use App\Form\ProductType;
+use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends AbstractController
 {
-    #[Route('/', name: 'app_main')]
-    public function index(ManagerRegistry $doctrine)
+    private $productRepository;
+
+    public function __construct(ProductRepository $productRepository)
     {
-        $data = $doctrine->getRepository(Product::class)->findAll();
+        $this->productRepository = $productRepository;
+    }
+
+    #[Route('/', name: 'app_main')]
+    public function index() : Response
+    {
+        $data = $this->productRepository->findAllWithCategory();
 
         return $this->render('main/index.html.twig', [
-         'productList' => $data,
+            'data' => $data,
         ]);
     }
 
     #[Route('/create', name: 'create')]
-    public function create(Request $request,ManagerRegistry $doctrine)
+    public function create(Request $request) : Response
     {
-
         $product = new Product();
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $doctrine->getManager();
-            $em->persist($product);
-            $em->flush();
+            $this->productRepository->add($product, true);
             $this->addFlash('notice', 'Product added to database');
-
             return $this->redirectToRoute('app_main');
         }
 
         return $this->render('main/create.html.twig', [
             'form' => $form->createView(),
         ]);
-
     }
-    #[Route('/get/{id}', name: 'get')]
-    public function get($id, ManagerRegistry $doctrine)
+
+    #[Route('/get/{id<\d+>}', name: 'get')]
+    public function get(int $id) : Response
     {
-        $product = $doctrine->getRepository(Product::class)->find($id);
-        $category = $product->getCategory()->getName();
+        $data = $this->productRepository->findOneWithCategory($id);
+        if (!$data) {
+            throw $this->createNotFoundException();
+        }
         return $this->render('main/getSingle.html.twig', [
-            'data' => $product,
-            'category' => $category,
+            'data' => $data,
         ]);
-
     }
-    #[Route('/update/{id}', name: 'update')]
-    public function update(Request $request, $id, ManagerRegistry $doctrine)
-    {
 
-        $product = $doctrine->getRepository(Product::class)->find($id);
-        $form = $this->createForm(ProductType::class, $product);
+    #[Route('/update/{id<\d+>}', name: 'update')]
+    public function update(Request $request, int $id) : Response
+    {
+        $data = $this->productRepository->findOneWithCategory($id);
+        if (!$data) {
+            throw $this->createNotFoundException();
+        }
+        $form = $this->createForm(ProductType::class, $data);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $doctrine->getManager();
-            $em->persist($product);
-            $em->flush();
+        if ($form->isSubmitted()) {
+            $this->productRepository->update($data, true);
             $this->addFlash('notice', 'Update Successfully');
-
             return $this->redirectToRoute('app_main');
         }
 
         return $this->render('main/update.html.twig', [
             'form' => $form->createView(),
         ]);
-
     }
-    #[Route('/delete/{id}', name: 'delete')]
-    public function delete($id, ManagerRegistry $doctrine)
+
+    #[Route('/delete/{id<\d+>}', name: 'delete')]
+    public function delete(int $id) : Response
     {
-        $product = $doctrine->getRepository(Product::class)->find($id);
-        $em = $doctrine->getManager();
-        $em->remove($product);
-        $em->flush();
+        $data = $this->productRepository->find($id);
+        $this->productRepository->remove($data, true);
         $this->addFlash('notice', 'Deleted Successfully');
 
         return $this->redirectToRoute('app_main');

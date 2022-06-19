@@ -5,9 +5,12 @@ namespace App\Entity;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
+#[UniqueEntity('name')]
 class Category
 {
     #[ORM\Id]
@@ -15,7 +18,11 @@ class Category
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Regex(
+        pattern: '/[a-zA-Z0-9]+/',
+    )]
     private $name;
 
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: Product::class)]
